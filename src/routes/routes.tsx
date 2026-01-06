@@ -58,6 +58,7 @@ import Saved from '@/pages/Profilev2/component/Saved';
 import PaymentCallback from '@/pages/Payment/PaymentCallback';
 import PaymentFailed from '@/pages/Payment/PaymentFailed';
 import SubscriptionPage from '@/pages/Subscription/SubscriptionPage';
+import StartTrialPage from '@/pages/Payment/StartTrialPage';
 import Forgetpassword from '@/pages/Auth/Forgetpassword';
 import Resetpassword from '@/pages/Auth/Resetpassword';
 
@@ -112,6 +113,14 @@ const englishRoutes = [
       { path: '/payment/success/:orderId', element: <PaymentSuccess /> },
       { path: '/payment/failed/:orderId', element: <PaymentFailed /> },
       { path: '/subscription', element: <SubscriptionPage /> },
+      {
+        path: '/start-trial',
+        element: (
+          <ProtectedRoute>
+            <StartTrialPage />
+          </ProtectedRoute>
+        ),
+      },
 
       // Protected Routes
 
@@ -125,7 +134,11 @@ const englishRoutes = [
       },
       {
         path: '/lists',
-        element: <ListsLayout />,
+        element: (
+          <ProtectedRoute>
+            <ListsLayout />
+          </ProtectedRoute>
+        ),
         children: [
           {
             path: ':id',
@@ -184,17 +197,17 @@ const englishRoutes = [
         children: [
           {
             index: true,
-            element: <ProfileViewGoals />
+            element: <ProfileViewGoals />,
           },
           {
             path: 'meal-history',
-            element: <ProfileMealHistory />
+            element: <ProfileMealHistory />,
           },
           {
             path: 'health-settings',
-            element: <ProfileHealthSettings />
-          }
-        ]
+            element: <ProfileHealthSettings />,
+          },
+        ],
       },
       {
         path: '/edit',
@@ -305,17 +318,18 @@ const arabicRoutes = [
   {
     element: <MainLayout />,
     children: englishRoutes[1].children.map((route) => {
+      const newPath = route.path === '*' ? '/ar/*' : `/ar${route.path}`;
       if (route.children) {
         return {
           ...route,
-          path: `/ar${route.path}`,
+          path: newPath,
           children: route.children.map((child) => ({
             ...child,
             path: child.path,
           })),
         };
       }
-      return { ...route, path: `/ar${route.path}` };
+      return { ...route, path: newPath };
     }),
   },
   {

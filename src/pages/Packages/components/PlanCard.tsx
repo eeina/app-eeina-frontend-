@@ -5,21 +5,18 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Package } from "@/types/Package";
-import { Loader2 } from "lucide-react";
 
 interface PlanCardProps {
   packages: Package[];
-  interval: "monthly" | "yearly";
-  onBuyNow: (pkg: Package) => void;
-  isCreatingOrder: boolean;
+  billingPeriod: "monthly" | "yearly";
+  onStartTrial: (pkg: Package) => void;
   activePackageId: string | undefined;
 }
 
 const PlanCard = ({
   packages,
-  interval,
-  onBuyNow,
-  isCreatingOrder,
+  billingPeriod,
+  onStartTrial,
   activePackageId,
 }: PlanCardProps) => {
   const { t, language } = useLanguage();
@@ -29,7 +26,7 @@ const PlanCard = ({
       {packages.map((pkg) => {
         const isBestDeal = pkg.bestDeal;
         const price =
-          interval === "monthly" ? pkg.baseMonthlyPrice : pkg.baseAnnualPrice;
+          billingPeriod === "monthly" ? pkg.baseMonthlyPrice : pkg.baseAnnualPrice;
         const currency = "SAR"; // Hardcoded or from API if available (API didn't show currency)
 
         const isFreePkg = pkg.slug === "free";
@@ -63,7 +60,7 @@ const PlanCard = ({
               {/* Show discount badge if yearly and special price exists, or just hardcoded for now? 
                    The API has specialAnnualPrice. If it is lower, we can show discount. 
                    For now, omitting specific discount badge logic unless 'premium' */}
-              {interval === "yearly" &&
+              {billingPeriod === "yearly" &&
                 pkg.baseAnnualPrice < pkg.baseMonthlyPrice * 12 && (
                   <Badge className="bg-[#D5F5E3] rounded-[6px] text-[#2ECC71] text-[13px] font-normal">
                     Save{" "}
@@ -80,7 +77,7 @@ const PlanCard = ({
               <span className="text-[19px]">{currency} </span>
               <span className="text-[33px]">{price} / </span>
               <span className="text-[18px] font-normal text-[#878787]">
-                {interval === "monthly" ? t.Package.month : t.Package.annual}
+                {billingPeriod === "monthly" ? t.Package.month : t.Package.annual}
               </span>
             </h2>
 
@@ -90,8 +87,8 @@ const PlanCard = ({
 
             {showButton && (
               <Button
-                onClick={() => onBuyNow(pkg)}
-                disabled={isCreatingOrder || isCurrentPlan}
+                onClick={() => onStartTrial(pkg)}
+                disabled={isCurrentPlan}
                 className={`py-6 text-[14px] lg:text-base font-medium rounded-xl flex items-center justify-center gap-2
                 ${
                   isBestDeal
@@ -99,9 +96,6 @@ const PlanCard = ({
                     : "border-[1.5px] border-[#EFEFEF] bg-[#F5F5F5] text-[#383838] hover:bg-[#FFFFFF] hover:border-black"
                 }`}
               >
-                {isCreatingOrder && !isCurrentPlan ? (
-                  <Loader2 className="animate-spin w-4 h-4" />
-                ) : null}
                 {isCurrentPlan
                   ? t.Package.CurrentPlan
                   : !isFreePkg
