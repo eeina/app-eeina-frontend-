@@ -33,7 +33,7 @@ const PackagePlan = ({
           {t.Package.upgradeanytime}
         </span>
       </div>
-      <h1 className="text-center text-[#242424] text-[20px] xl:text-[36px] xl2:text-[44px]! font-semibold">
+      <h1 className="text-center text-[#242424] text-[20px] xl:text-[36px] xl2:text-[44px]! !font-semibold">
         {t.Package.upgradeanytimetitle}
       </h1>
       <p className="text-center text-[#878787] text-[16px] xl:text-[20px] xl2:text-[24px]! font-normal">
