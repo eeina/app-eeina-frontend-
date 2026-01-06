@@ -34,7 +34,7 @@ const PlanCard = ({
           billingPeriod === "monthly"
             ? pkg.specialMonthlyPrice
             : pkg.specialAnnualPrice;
-        const currency = "SAR"; // Hardcoded or from API if available (API didn't show currency)
+        const currency = `${language == "ar" ? "ريال" : "SAR"}`; // Hardcoded or from API if available (API didn't show currency)
 
         const isFreePkg = pkg.slug === "free";
         const isCurrentPlan =
@@ -45,7 +45,7 @@ const PlanCard = ({
         const CardContent = (
           <Card
             className={`p-5 justify-between rounded-[22px] flex flex-col gap-3 border border-[#D6D6D6] h-[336px] ${
-              isBestDeal ? "bg-[#F6FEFF]" : "bg-white"
+              isBestDeal ? "bg-[#F6FEFF]" : "bg-transparent"
             }`}
           >
             <div
@@ -53,11 +53,13 @@ const PlanCard = ({
                 isBestDeal ? "gap-3" : "justify-between"
               } items-center`}
             >
-              <div className="flex gap-3 items-center flex-wrap">
-                <Lighting />
-                <span className="text-[20px] font-medium">
-                  {pkg.name[language]}
-                </span>
+              <div className="flex gap-3 items-center justify-between flex-wrap w-full">
+                <div className=" flex items-center gap-3">
+                  <Lighting />
+                  <span className="text-[20px] font-medium">
+                    {pkg.name[language]}
+                  </span>
+                </div>
                 {!isFreePkg && (
                   <span className="bg-[#E0F2FE] text-[#0284C7] text-[10px] sm:text-[11px] px-2.5 py-1 rounded-full font-bold tracking-wide">
                     {t.Package.freeTrialBadge}
@@ -69,7 +71,7 @@ const PlanCard = ({
                    For now, omitting specific discount badge logic unless 'premium' */}
               {billingPeriod === "yearly" &&
                 pkg.baseAnnualPrice < pkg.baseMonthlyPrice * 12 && (
-                  <Badge className="bg-[#D5F5E3] rounded-[6px] text-[#2ECC71] text-[13px] font-normal">
+                  <Badge className="w-fit shrink-0 bg-[#D5F5E3] hover:bg-[#c4f4d9] rounded-[6px] text-[#2ECC71] text-[13px] font-normal">
                     {t.payment.save}{" "}
                     {(
                       100 -
@@ -119,20 +121,24 @@ const PlanCard = ({
               )}
             </div>
 
-            <p className="text-base font-normal text-[#606060] border-b pb-5 border-b-[#F5F5F5] empty:hidden">
-              {/* Description missing in API, maybe use first feature or empty? */}
+            <p className="text-base font-normal text-[#606060] border-b pb-5 border-b-[#F5F5F5]">
+              {pkg.features[0][language]}
             </p>
 
             {showButton && (
               <Button
                 onClick={() => onStartTrial(pkg)}
                 disabled={isCurrentPlan}
-                className={`py-6 text-[14px] lg:text-base font-medium rounded-xl flex items-center justify-center gap-2
+                className={`
+                 
+                  py-6 text-[14px] lg:text-base font-medium rounded-xl flex items-center justify-center gap-2
                 ${
                   isBestDeal
                     ? "border-[1.5px] border-[#FFFFFF00] bg-[#6AB240] text-white hover:bg-[#6AB240] shadow-lg shadow-[#6AB240]/20"
-                    : "border-[1.5px] border-[#EFEFEF] bg-[#F5F5F5] text-[#383838] hover:bg-[#FFFFFF] hover:border-black"
-                }`}
+                    : "border-[1.5px] border-[#EFEFEF] bg-[#F5F5F5] text-[#383838] hover:bg-[#F5F5F5] "
+                }
+                
+                `}
               >
                 {isCurrentPlan
                   ? t.Package.CurrentPlan
@@ -143,7 +149,6 @@ const PlanCard = ({
             )}
           </Card>
         );
-
         if (isBestDeal) {
           return (
             <div
@@ -161,13 +166,9 @@ const PlanCard = ({
           );
         }
 
-        return (
-          <div key={pkg._id} className="h-full">
-            {CardContent}
-          </div>
-        );
+        return <div key={pkg._id}>{CardContent}</div>;
       })}
-      <Card className="relative p-5 justify-between rounded-[22px] flex flex-col gap-3 border border-[#D6D6D6] h-full">
+      <Card className="relative p-5 justify-between rounded-[22px] flex flex-col gap-3 border border-[#D6D6D6] h-[336px]">
         <div className="flex justify-between items-center">
           <div className="flex gap-3 items-center">
             <Lighting />

@@ -1,9 +1,9 @@
 import { PackageTranslations } from "../../types/package";
 
 export const packageTrans: PackageTranslations = {
-  upgradeanytime: "الترقية في أي وقت",
-  upgradeanytimetitle: "اختر الخطة المناسبة لك",
-  upgradeanytimedusc: "احصل على جميع المميزات واستمتع بتجربة أفضل",
+ "upgradeanytime": "ابدأ مجانًا وقم بالترقية في أي وقت!",
+   "upgradeanytimetitle": "اختر الخطة التي تناسب تغذيتك واهدافك",
+   "upgradeanytimedusc": "سواء كنت بدأت للتو أو تقوم بتوسيع نطاق عملك، تقدم EEINA خططًا مرنة لتلبية احتياجاتك.",
   BestDeals: "أفضل العروض",
   month: "شهر",
   annual: "سنة",
