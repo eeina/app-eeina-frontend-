@@ -36,6 +36,7 @@ export const Signup = (): JSX.Element => {
   );
   // const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [signUp] = useSignupMutation();
   const navigate = useNavigate();
   const [referralsTrack] = useReferralsTrackMutation();
@@ -69,6 +70,7 @@ export const Signup = (): JSX.Element => {
   });
 
   const password = watch('password');
+  const confirm_password = watch('confirmPassword');
 
   // calculate password strength
   React.useEffect(() => {
