@@ -17,13 +17,7 @@ import { getLocalizedPath } from '@/lib/getLocalizedPath';
 import { trackIfAllowed } from '@/utils/analyticsHelper';
 import { FacebookIcon, Google } from '@/assets';
 import { countries } from '@/data/countries';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 
 // Get API URL from environment
 const API_URL = import.meta.env.VITE_API_URL;
@@ -70,7 +64,6 @@ export const Signup = (): JSX.Element => {
   });
 
   const password = watch('password');
-  const confirm_password = watch('confirmPassword');
 
   // calculate password strength
   React.useEffect(() => {
@@ -90,8 +83,10 @@ export const Signup = (): JSX.Element => {
 
       // Format phone number with selected country dial code if it exists
       const formattedData = { ...data };
+      let formattedPhone = '';
       if (formattedData.phone) {
-        formattedData.phone = `${selectedCountry.dialCode}${formattedData.phone}`;
+        formattedPhone = `${selectedCountry.dialCode}${formattedData.phone}`;
+        formattedData.phone = formattedPhone;
       }
 
       const payload = referralCode ? { ...formattedData, referralCode } : formattedData;
@@ -101,8 +96,14 @@ export const Signup = (): JSX.Element => {
       // Track successful signup
       trackIfAllowed(() => analytics.trackSignup('email'));
 
+      // Navigate to email verification first
+      // After email is verified, user can optionally verify phone
       navigate(getLocalizedPath('/verify-otp', language), {
-        state: { email: data.email, redirectTo: '/goals-setup' },
+        state: {
+          email: data.email,
+          phone: formattedPhone, // Pass phone for optional SMS verification later
+          redirectTo: formattedPhone ? '/verify-phone-otp' : '/goals-setup', // Go to phone verification if phone provided
+        },
       });
     } catch (error: any) {
       toast.error(error?.data?.message || t.auth.signup_failed);
