@@ -27,4 +27,6 @@ export interface CommonTranslations {
   done: string;
   generating: string;
   error_occurred: string;
+  no_results: string;
+  adding: string;
 }

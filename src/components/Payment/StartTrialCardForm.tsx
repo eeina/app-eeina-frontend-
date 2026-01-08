@@ -31,7 +31,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Loader2, ShieldCheck, CreditCard, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { useStartTrialMutation } from '@/redux/Features/Subscriptions/subscriptionApi';
+import { useCreateCustomerMutation } from '@/redux/Features/Payment/PaymentApi';
 import { useAppSelector } from '@/hooks/hook';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 // Public key - safe to expose in frontend
 const TAP_PUBLIC_KEY = import.meta.env.VITE_TAP_PUBLIC_KEY;
@@ -91,6 +93,7 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
   onError,
   onCancel,
 }) => {
+  const { t, language } = useLanguage();
   // State
   const [tapReady, setTapReady] = useState(false);
   const [isCardValid, setIsCardValid] = useState(false);
@@ -108,6 +111,22 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
 
   // API mutation
   const [startTrial, { isLoading: isStartingTrial }] = useStartTrialMutation();
+  const [createCustomer, { isLoading: isCreatingCustomer }] = useCreateCustomerMutation();
+
+  // Ensure customer ID exists before rendering form
+  useEffect(() => {
+    const ensureCustomer = async () => {
+      if (user && !(user as any).tapCustomerId && !isCreatingCustomer) {
+        try {
+          await createCustomer().unwrap();
+        } catch (err) {
+          console.error('Failed to create Tap customer:', err);
+          setError('Failed to initialize payment system. Please refresh.');
+        }
+      }
+    };
+    ensureCustomer();
+  }, [user, createCustomer, isCreatingCustomer]);
 
   // Customer info for Tap SDK
   const customerFirst = user?.firstName || user?.fullName?.split(' ')?.[0] || 'Customer';
@@ -186,7 +205,11 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
   );
 
   // Configuration check
-  const configError = !TAP_PUBLIC_KEY ? 'Tap public key is missing. Contact support.' : null;
+  const configError = !TAP_PUBLIC_KEY
+    ? language == 'ar'
+      ? 'مفتاح Tap العام مفقود. تواصل مع الدعم.'
+      : 'Tap public key is missing. Contact support.'
+    : null;
 
   // Can submit check
   const canSubmit =
@@ -260,10 +283,13 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
       <CardHeader>
         <div className="flex items-center gap-2 mb-2">
           <CreditCard className="h-6 w-6 text-primary" />
-          <CardTitle className="text-2xl">Start Free Trial</CardTitle>
+          <CardTitle className="text-2xl">{t.payment.StartFreeTrial}</CardTitle>
         </div>
         <CardDescription>
-          Try {packageName} free for {trialDays} days. Cancel anytime.
+          {t.payment.TryFreeTrial.replace('{packageName}', packageName).replace(
+            '{trialDays}',
+            String(trialDays),
+          )}
         </CardDescription>
       </CardHeader>
 
@@ -272,29 +298,31 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
         <div className="bg-blue-50 p-4 rounded-md flex items-center gap-3 text-blue-700 border border-blue-100">
           <ShieldCheck className="w-5 h-5 flex-shrink-0" />
           <div className="text-sm">
-            <p className="font-medium">Your card is secure</p>
-            <p className="text-blue-600 text-xs">
-              We verify your card but won't charge until trial ends.
-            </p>
+            <p className="font-medium">{t.payment.CardSecureTitle}</p>
+            <p className="text-blue-600 text-xs">{t.payment.CardSecureDescription}</p>
           </div>
         </div>
 
         {/* Trial Info */}
         <div className="bg-gray-50 p-4 rounded-md space-y-2">
           <div className="flex justify-between text-sm">
-            <span className="text-gray-600">Plan</span>
+            <span className="text-gray-600">{t.payment.Plan}</span>
             <span className="font-medium">
-              {packageName} ({billingPeriod})
+              {packageName}{' '}
+              {billingPeriod === 'yearly' ? `${t.payment.yearly}` : `${t.payment.monthly}`}
             </span>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-gray-600">Free trial</span>
-            <span className="font-medium text-green-600">{trialDays} days</span>
+            <span className="text-gray-600">{t.payment.FreeTrial}</span>
+            <span className="font-medium text-green-600">
+              {trialDays} {t.payment.days}
+            </span>
           </div>
           <div className="flex justify-between text-sm">
-            <span className="text-gray-600">Then</span>
+            <span className="text-gray-600">{t.payment.Then}</span>
             <span className="font-medium">
-              {currency} {displayAmount.toFixed(2)}/{billingPeriod === 'yearly' ? 'year' : 'month'}
+              {currency} {displayAmount.toFixed(2)}/
+              {billingPeriod === 'yearly' ? `${t.payment.perYear}` : `${t.payment.perMonth}`}
             </span>
           </div>
         </div>
@@ -393,21 +421,25 @@ export const PaymentForm: React.FC<PaymentFormProps> = ({
                 onClick={onCancel}
                 disabled={isProcessing}
               >
-                Cancel
+                {t.common.cancel}
               </Button>
             )}
 
             {/* Terms */}
             <p className="text-xs text-center text-gray-500">
-              By starting your trial, you agree to our{' '}
-              <a href="/terms" className="underline hover:text-gray-700">
-                Terms of Service
+              {language == 'ar'
+                ? 'ببدء الفترة التجريبية، فإنك توافق على'
+                : 'By starting your trial, you agree to our'}{' '}
+              <a href="/Terms_Conditions" className="underline hover:text-gray-700">
+                {language == 'ar' ? 'شروط الخدمة' : 'Terms of Service'}
               </a>{' '}
-              and{' '}
-              <a href="/privacy" className="underline hover:text-gray-700">
-                Privacy Policy
+              {language == 'ar' ? 'و' : 'and'}{' '}
+              <a href="/privacy-policy" className="underline hover:text-gray-700">
+                {language == 'ar' ? 'سياسة الخصوصية' : ' Privacy Policy'}
               </a>
-              . You can cancel anytime before the trial ends.
+              {language == 'ar'
+                ? 'يمكنك الإلغاء في أي وقت قبل انتهاء الفترة التجريبية.'
+                : 'You can cancel anytime before the trial ends.'}
             </p>
           </div>
         )}
